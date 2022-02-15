@@ -1,0 +1,62 @@
+# roles/vagrant/tasks/docker.yml
+- name: Vagrant | Docker | Disable SWAP memory
+  ansible.builtin.shell: |
+    swapoff --all
+
+- name: Vagrant | Docker | Disable SWAP in fstab
+  ansible.builtin.replace:
+    path: /etc/fstab
+    regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
+    replace: '# \1'
+
+- name: Vagrant | Docker | Update all packages to their latest version
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+
+- name: Vagrant | Docker | Install a list of packages
+  ansible.builtin.apt:
+    pkg:
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+      - python3-pip
+      - vim
+      - git
+      - htop
+
+- name: Vagrant | Docker | Add Docker's official GPG key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    keyring: /usr/share/keyrings/docker-archive-keyring.gpg
+    state: present
+
+- name: Vagrant | Docker | Add Docker stable repository
+  ansible.builtin.apt_repository:
+    repo: deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu focal stable
+    filename: docker
+    state: present
+
+- name: Vagrant | Docker | Install Docker Engine
+  ansible.builtin.apt:
+    pkg:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+    update_cache: yes
+
+- name: Vagrant | Docker | Add 'vagrant' user on 'docker' group
+  ansible.builtin.user:
+    name: vagrant
+    groups: docker
+    append: yes
+
+- name: Vagrant | Docker | Template a file to /etc/docker/daemon.json
+  ansible.builtin.template:
+    src: daemon.json.j2
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: '0640'
+  notify: Restart docker daemon

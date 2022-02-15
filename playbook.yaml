@@ -1,0 +1,15 @@
+- hosts: vagrant
+  gather_facts: yes
+  any_errors_fatal: true
+  become: yes
+  pre_tasks:
+    - name: Verify Ansible meets version requirements.
+      ansible.builtin.assert:
+        that:
+         - "ansible_version.full is version_compare('2.12.0', '>=')"
+        msg: "You must update Ansible to at 2.12.0 or newer to use this Playbook."
+
+  roles:
+    - role: vagrant
+      tags:
+        - vagrant

@@ -1,0 +1,20 @@
+# roles/vagrant/tasks/filesystem.yml
+- name: Vagrant | Filesystem | Create a new ext4 primary partition
+  community.general.parted:
+    device: /dev/sdb
+    number: 1
+    state: present
+    fs_type: "{{ vagrant_filesystem_fstype }}"
+
+- name: Vagrant | Filesystem | Create a {{ vagrant_filesystem_fstype }} filesystem on /dev/sdb1
+  community.general.filesystem:
+    fstype: "{{ vagrant_filesystem_fstype }}"
+    dev: /dev/sdb1
+    state: present
+
+- name: Vagrant | Filesystem | Mount up Docker directory
+  ansible.posix.mount:
+    path: /mnt/docker
+    src: /dev/sdb1
+    fstype: "{{ vagrant_filesystem_fstype }}"
+    state: mounted

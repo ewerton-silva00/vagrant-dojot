@@ -1,0 +1,8 @@
+# roles/vagrant/tasks/main.yml
+- name: Vagrant | Filesystem | Include filesystem tasks
+  include_tasks: filesystem.yml
+  tags: filesystem
+
+- name: Vagrant | Docker | Include docker tasks
+  include_tasks: docker.yml
+  tags: docker

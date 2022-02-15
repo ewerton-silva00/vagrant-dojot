@@ -1,0 +1,6 @@
+---
+# roles/vagrant/handle/main.yml
+- name: Restart docker daemon
+  ansible.builtin.systemd:
+    name: docker.service
+    state: restarted

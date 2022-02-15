@@ -1,0 +1,8 @@
+---
+# roles/vagrant/defaults/main.yml
+vagrant_filesystem_fstype: ext4
+
+vagrant_docker_data_root: /mnt/docker
+vagrant_docker_log_driver: json-file
+vagrant_docker_log_max_file: 3
+vagrant_docker_log_max_size: 10m
