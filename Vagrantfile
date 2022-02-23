@@ -2,7 +2,7 @@
 # vi: set ft=ruby :
 
 servers = {
-  'k3s' => { 'ip' => '10.10.10.10', 'memory' => '4096', 'cpus' => '4', 'disk0' => '/tmp/docker.vdi', 'disk1' => '/tmp/k3s.vdi' }
+  'dojot' => { 'ip' => '10.10.10.10', 'memory' => '4096', 'cpus' => '4' }
 }
 
 disk_to_docker = '/tmp/docker.vdi'
