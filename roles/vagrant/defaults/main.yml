@@ -1,8 +1,61 @@
 ---
-# roles/vagrant/defaults/main.yml
-vagrant_filesystem_fstype: ext4
+# Vagrant Box user
+vagrant_user: vagrant
 
-vagrant_docker_data_root: /mnt/docker
-vagrant_docker_log_driver: json-file
-vagrant_docker_log_max_file: 3
-vagrant_docker_log_max_size: 10m
+# The variables above are used on roles/vagrant/tasks/filesystem.yml
+filesystem_configure: true
+
+filesystem_fstype: ext4
+
+# The variables above are used on roles/vagrant/tasks/docker.yml
+docker_engine_install: true
+
+docker_engine_data_root: '/mnt/docker'
+
+docker_engine_log_driver: 'json-file'
+
+docker_engine_log_max_file: 3
+
+docker_engine_log_max_size: 10m
+
+# The variables above are used on roles/vagrant/tasks/docker_compose.yml
+docker_compose_install: true
+
+docker_compose_version: 1.29.2
+
+docker_compose_install_dir: '/usr/local/bin'
+
+# The variables above are used on roles/vagrant/tasks/k3s_install.yml
+k3s_install: true
+
+k3s_version: 1.20.15
+
+k3s_os: linux
+
+k3s_architecture: amd64
+
+k3s_install_dir: '/usr/local/bin'
+
+k3s_server_data_dir: '/var/lib/rancher/k3s'
+
+# Valid items: coredns, servicelb, traefik, local-storage, metrics-server
+k3s_disable_services:
+  - servicelb
+  - traefik
+
+# The variables above are used on roles/vagrant/tasks/tools.yml
+kubernetes_tools_install: true
+
+kubernetes_kubectl_version: 1.23.0
+
+kubernetes_kubectl_dir: '/usr/local/bin'
+
+kubernetes_helm_install: true
+
+kubernetes_helm_version: 3.7.2
+
+kubernetes_helm_os: linux
+
+kubernetes_helm_architecture: amd64
+
+kubernetes_helm_dir: '/usr/local/bin'

@@ -1,0 +1,50 @@
+---
+# roles/vagrant/tasks/tools.yml
+- name: Kubernetes Tools | Kubectl | Install kubectl
+  ansible.builtin.get_url:
+    url: "https://dl.k8s.io/release/v{{ kubernetes_kubectl_version }}/bin/linux/amd64/kubectl"
+    dest: "{{ kubernetes_kubectl_dir }}/kubectl"
+    force: yes
+    validate_certs: yes
+    mode: 0755
+  tags: kubectl
+
+- name: Kubernetes Tools | Kubectl | Kubectl command-line completion
+  ansible.builtin.shell:
+    cmd: "{{ kubernetes_kubectl_dir }}/kubectl completion bash > /etc/bash_completion.d/kubectl"
+  tags: kubectl
+
+- name: Kubernetes Tools | Helm | Create download directory
+  ansible.builtin.file:
+    state: directory
+    mode: 'u=rwx,go=x'
+    dest: "{{ helm_download_dir }}"
+  tags: helm
+
+- name: Kubernetes Tools | Helm | Download Helm
+  ansible.builtin.get_url:
+    url: "{{ kubernetes_helm_mirror }}/{{ helm_redistributable_filename }}"
+    dest: "{{ helm_download_dir }}/{{ helm_redistributable_filename }}"
+    force: yes
+    validate_certs: yes
+    mode: 'u=rw,go=x'
+  tags: helm
+
+- name: Kubernetes Tools | Helm | Unarchive and install Helm
+  ansible.builtin.unarchive:
+    src: "{{ helm_download_dir }}/{{ helm_redistributable_filename }}"
+    dest: "{{ kubernetes_helm_dir }}"
+    extra_opts:
+      - '--strip-component=1'
+    remote_src: yes
+    owner: root
+    group: root
+    mode: 0755
+    creates: "{{ kubernetes_helm_dir }}/helm"
+  tags: helm
+
+- name: Kubernetes Tools | Helm | Install Helm diff plugin for better idempotency
+  kubernetes.core.helm_plugin:
+    plugin_path: 'https://github.com/databus23/helm-diff'
+    state: present
+  tags: helm

@@ -1,8 +1,26 @@
 # roles/vagrant/tasks/main.yml
-- name: Vagrant | Filesystem | Include filesystem tasks
+- name: Filesystem | Include filesystem tasks
   include_tasks: filesystem.yml
-  tags: filesystem
+  tags:
+    - filesystem
+  when: filesystem_configure | bool
 
-- name: Vagrant | Docker | Include docker tasks
+- name: Docker | Include docker tasks
   include_tasks: docker.yml
-  tags: docker
+  tags:
+    - docker
+    - docker_compose
+  when: docker_engine_install | bool
+
+- name: K3s | Include k3s tasks
+  include_tasks: k3s.yml
+  tags:
+    - k3s
+  when: k3s_install | bool
+
+- name: Kubernetes Tools | Include kubernetes tools tasks
+  include_tasks: tools.yml
+  tags:
+    - kubectl
+    - helm
+  when: kubernetes_tools_install | bool

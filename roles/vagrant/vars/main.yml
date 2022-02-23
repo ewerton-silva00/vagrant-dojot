@@ -1,2 +1,13 @@
 ---
-# vars file for roles/vagrant
+# The variables above are used on roles/vagrant/tasks/k3s.yml
+k3s_download_mirror: "https://github.com/k3s-io/k3s/releases/download/v{{ k3s_version }}%2Bk3s1"
+
+# k3s_master_ip: "{{ hostvars[groups['master'][0]]['ansible_host'] | default(groups['master'][0]) }}"
+k3s_current_ip: "{{ hostvars[inventory_hostname].ansible_host }}"
+
+# The variables above are used on roles/vagrant/tasks/tools.yml
+helm_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
+
+kubernetes_helm_mirror: 'https://get.helm.sh'
+
+helm_redistributable_filename: "helm-v{{ kubernetes_helm_version }}-{{ kubernetes_helm_os }}-{{ kubernetes_helm_architecture }}.tar.gz"

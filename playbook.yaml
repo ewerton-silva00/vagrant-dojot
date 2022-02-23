@@ -1,4 +1,4 @@
-- hosts: vagrant
+- hosts: master
   gather_facts: yes
   any_errors_fatal: true
   become: yes
@@ -11,5 +11,3 @@
 
   roles:
     - role: vagrant
-      tags:
-        - vagrant

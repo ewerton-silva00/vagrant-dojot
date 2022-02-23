@@ -1,6 +1,6 @@
 all:
   hosts:
-    vagrant:
+    master:
       ansible_host: 10.10.10.10
       ansible_port: 22
       ansible_user: vagrant

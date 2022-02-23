@@ -1,20 +1,24 @@
 # roles/vagrant/tasks/docker.yml
-- name: Vagrant | Docker | Disable SWAP memory
+- name: Docker | Disable SWAP memory
   ansible.builtin.shell: |
     swapoff --all
+  tags: docker
 
-- name: Vagrant | Docker | Disable SWAP in fstab
+- name: Docker | Disable SWAP in fstab
   ansible.builtin.replace:
     path: /etc/fstab
     regexp: '^([^#].*?\sswap\s+sw\s+.*)$'
     replace: '# \1'
+  tags: docker
 
-- name: Vagrant | Docker | Update all packages to their latest version
+- name: Docker | Update all packages to their latest version. This might take a while
   ansible.builtin.apt:
     name: "*"
     state: latest
+    update_cache: yes
+  tags: docker
 
-- name: Vagrant | Docker | Install a list of packages
+- name: Docker | Install a list of packages
   ansible.builtin.apt:
     pkg:
       - ca-certificates
@@ -25,38 +29,63 @@
       - vim
       - git
       - htop
+  tags: docker
 
-- name: Vagrant | Docker | Add Docker's official GPG key
+- name: Docker | Add Docker's official GPG key
   ansible.builtin.apt_key:
     url: https://download.docker.com/linux/ubuntu/gpg
     keyring: /usr/share/keyrings/docker-archive-keyring.gpg
     state: present
+  tags: docker
 
-- name: Vagrant | Docker | Add Docker stable repository
+- name: Docker | Add Docker stable repository
   ansible.builtin.apt_repository:
-    repo: deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu focal stable
+    repo: deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu {{ ansible_facts.lsb.codename }} stable
     filename: docker
     state: present
+  tags: docker
 
-- name: Vagrant | Docker | Install Docker Engine
+- name: Docker | Install Docker Engine
   ansible.builtin.apt:
     pkg:
       - docker-ce
       - docker-ce-cli
       - containerd.io
-    update_cache: yes
+  tags: docker
 
-- name: Vagrant | Docker | Add 'vagrant' user on 'docker' group
+- name: Docker | Add {{ vagrant_user }} user on docker group
   ansible.builtin.user:
-    name: vagrant
+    name: "{{ vagrant_user }}"
     groups: docker
     append: yes
+  tags: docker
 
-- name: Vagrant | Docker | Template a file to /etc/docker/daemon.json
+- name: Docker | Template a file to /etc/docker/daemon.json
   ansible.builtin.template:
     src: daemon.json.j2
     dest: /etc/docker/daemon.json
     owner: root
     group: root
-    mode: '0640'
+    mode: 0640
   notify: Restart docker daemon
+  tags: docker
+
+- name: Docker Compose | Install Docker Compose v{{ docker_compose_version }}
+  ansible.builtin.get_url:
+    url: "https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64"
+    dest: /usr/local/bin/docker-compose
+    force: yes
+    validate_certs: yes
+    mode: 0755
+  tags: docker_compose
+  when: docker_compose_install | bool
+
+- name: Docker Compose | Install command-line completion
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/docker/compose/{{ docker_compose_version }}/contrib/completion/bash/docker-compose"
+    dest: /etc/bash_completion.d/docker-compose
+    force: yes
+    validate_certs: yes
+    mode: 0644
+  tags: docker_compose
+  when: docker_compose_install | bool

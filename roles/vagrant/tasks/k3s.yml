@@ -1,0 +1,53 @@
+---
+# roles/vagrant/tasks/k3s.yml
+- name: K3s | Installing k3s server
+  ansible.builtin.get_url:
+    url: "{{ k3s_download_mirror }}/k3s"
+    dest: "{{ k3s_install_dir }}/k3s"
+    force: yes
+    validate_certs: yes
+    mode: 0755
+  tags: k3s
+
+- name: K3s | Copy K3s service file
+  ansible.builtin.template:
+    src: k3s.service.j2
+    dest: /etc/systemd/system/k3s.service
+    owner: root
+    group: root
+    mode: 0644
+  tags: k3s
+
+- name: K3s | Enable and start k3s service
+  ansible.builtin.systemd:
+    name: k3s.service
+    state: started
+    enabled: yes
+  tags: k3s
+
+- name: K3s | Create ~/.kube directory
+  ansible.builtin.file:
+    path: "/home/{{ vagrant_user }}/.kube"
+    owner: "{{ vagrant_user }}"
+    group: "{{ vagrant_user }}"
+    mode: 0700
+  register: kube_directory_created
+  tags: k3s
+
+- name: K3s | Create the kubeconfig file
+  ansible.builtin.copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: "{{ kube_directory_created.path }}/config"
+    owner: "{{ vagrant_user }}"
+    group: "{{ vagrant_user }}"
+    mode: 0644
+    remote_src: yes
+  register: kubeconfig_file_path
+  tags: k3s
+
+- name: K3s | Replace 'https://127.0.0.1:6443' by 'https://{{ k3s_current_ip }}:6443' on kubeconfig file
+  ansible.builtin.command: >-
+    {{ kubernetes_kubectl_dir }}/kubectl config set-cluster default
+    --server=https://{{ k3s_current_ip }}:6443
+    --kubeconfig {{ kubeconfig_file_path.dest }}
+  tags: k3s

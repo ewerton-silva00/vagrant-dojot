@@ -1,20 +1,52 @@
 # roles/vagrant/tasks/filesystem.yml
-- name: Vagrant | Filesystem | Create a new ext4 primary partition
+- name: Filesystem | Docker | Create a new {{ filesystem_fstype }} primary partition
   community.general.parted:
     device: /dev/sdb
     number: 1
     state: present
-    fs_type: "{{ vagrant_filesystem_fstype }}"
+    fs_type: "{{ filesystem_fstype }}"
+  tags: filesystem
+  when: docker_engine_install | bool
 
-- name: Vagrant | Filesystem | Create a {{ vagrant_filesystem_fstype }} filesystem on /dev/sdb1
+- name: Filesystem | Docker | Create a {{ filesystem_fstype }} filesystem on /dev/sdb1
   community.general.filesystem:
-    fstype: "{{ vagrant_filesystem_fstype }}"
+    fstype: "{{ filesystem_fstype }}"
     dev: /dev/sdb1
     state: present
+  tags: filesystem
+  when: docker_engine_install | bool
 
-- name: Vagrant | Filesystem | Mount up Docker directory
+- name: Filesystem | Docker | Mount up Docker directory
   ansible.posix.mount:
     path: /mnt/docker
     src: /dev/sdb1
-    fstype: "{{ vagrant_filesystem_fstype }}"
+    fstype: "{{ filesystem_fstype }}"
     state: mounted
+  tags: filesystem
+  when: docker_engine_install | bool
+
+- name: Filesystem | K3s | Create a new {{ filesystem_fstype }} primary partition
+  community.general.parted:
+    device: /dev/sdc
+    number: 1
+    state: present
+    fs_type: "{{ filesystem_fstype }}"
+  tags: filesystem
+  when: k3s_install | bool
+
+- name: Filesystem | K3s | Create a {{ filesystem_fstype }} filesystem on /dev/sdc1
+  community.general.filesystem:
+    fstype: "{{ filesystem_fstype }}"
+    dev: /dev/sdc1
+    state: present
+  tags: filesystem
+  when: k3s_install | bool
+
+- name: Filesystem | K3s | Mount up Docker directory
+  ansible.posix.mount:
+    path: /mnt/k3s
+    src: /dev/sdc1
+    fstype: "{{ filesystem_fstype }}"
+    state: mounted
+  tags: filesystem
+  when: k3s_install | bool
