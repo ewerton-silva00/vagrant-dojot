@@ -28,6 +28,7 @@
 - name: K3s | Create ~/.kube directory
   ansible.builtin.file:
     path: "/home/{{ vagrant_user }}/.kube"
+    state: directory
     owner: "{{ vagrant_user }}"
     group: "{{ vagrant_user }}"
     mode: 0700
@@ -47,7 +48,7 @@
 
 - name: K3s | Replace 'https://127.0.0.1:6443' by 'https://{{ k3s_current_ip }}:6443' on kubeconfig file
   ansible.builtin.command: >-
-    {{ kubernetes_kubectl_dir }}/kubectl config set-cluster default
+    {{ k3s_install_dir }}/k3s kubectl config set-cluster default
     --server=https://{{ k3s_current_ip }}:6443
     --kubeconfig {{ kubeconfig_file_path.dest }}
   tags: k3s
